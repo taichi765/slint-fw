@@ -38,7 +38,7 @@ fn slint_fw_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream
             let field_name = f.ident;
             let field_ty = f.ty;
             quote! {
-                #field_name: fw::PropertyHandle<#field_ty>
+                #field_name: slint_fw::PropertyHandle<#field_ty>,
             }
         });
         quote! {
@@ -50,10 +50,15 @@ fn slint_fw_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream
     let viewmodel_trait = {
         let callbacks = item.callbacks.into_iter().map(|f| {
             let fn_name = format_ident!("on_{}", &f.ident);
-            let arg_typ = f.arg_type.elems;
+            let args = f.arg_type.elems.iter().enumerate().map(|(idx, typ)| {
+                let arg_name = format_ident!("args_{}", idx);
+                quote! {
+                    #arg_name: #typ,
+                }
+            });
             let ret_typ = f.ret_type;
             quote! {
-                fn #fn_name(#arg_typ) -> #ret_typ;
+                fn #fn_name(#(#args)*) -> #ret_typ;
             }
         });
 

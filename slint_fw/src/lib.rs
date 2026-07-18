@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use thiserror::Error;
 
 pub mod nav;
+pub use slint_fw_macros::slint_fw;
 
 /// A handle to slint's property.
 ///
