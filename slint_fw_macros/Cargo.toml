@@ -1,7 +1,10 @@
 [package]
 name = "slint-fw-macros"
-version.workspace = true
 edition.workspace = true
+# When including taichi765/slint-fw repository as git submodule, version is inherited from
+# user's workspace, not this repository's workspace.
+# Due to that, we need to sync versions between slint-fw and slint-fw-macros manually.
+version = "0.1.0"
 
 [lib]
 proc-macro = true
