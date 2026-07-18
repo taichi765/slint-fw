@@ -10,6 +10,7 @@ pub struct InnerGlobalComponent {
     pub callbacks: Vec<CallbackField>,
     pub callback_trackers: Vec<Field>,
     pub change_trackers: Vec<Field>,
+    pub globals: Field,
     pub original: ItemStruct,
 }
 
@@ -33,13 +34,14 @@ impl Parse for InnerGlobalComponent {
             return Err(syn::Error::new_spanned(
                 &item_struct,
                 "expected named fields",
-            ))?;
+            ));
         };
 
         let mut property_fields = Vec::new();
         let mut callback_fields = Vec::new();
         let mut callback_tracker_fields = Vec::new();
         let mut change_tracker_fields = Vec::new();
+        let mut globals = None;
         for f in &fields.named {
             let ident = f.ident.as_ref().unwrap().to_string(); // Named fields always have ident
             if ident.starts_with("callback_tracker_") {
@@ -50,10 +52,18 @@ impl Parse for InnerGlobalComponent {
                 property_fields.push(p);
             } else if let Ok(cb) = map_callback_field(&f) {
                 callback_fields.push(cb);
+            } else if f.ident.as_ref().unwrap() == "globals" {
+                globals = Some(f.to_owned());
             } else {
                 return Err(syn::Error::new_spanned(&f, "unknown kind of field"));
             }
         }
+        let Some(globals) = globals else {
+            return Err(syn::Error::new_spanned(
+                item_struct,
+                "cannot find `globals` field",
+            ));
+        };
 
         Ok(Self {
             original_ident: item_struct.ident.to_owned(),
@@ -62,6 +72,7 @@ impl Parse for InnerGlobalComponent {
             callbacks: callback_fields,
             callback_trackers: callback_tracker_fields,
             change_trackers: change_tracker_fields,
+            globals,
             original: item_struct,
         })
     }
