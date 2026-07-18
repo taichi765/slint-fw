@@ -1,0 +1,12 @@
+[package]
+name = "slint-fw"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+slint-fw-macros = { path = "../slint_fw_macros" }
+
+thiserror = { workspace = true }
+futures-util = { workspace = true }
+tracing = { workspace = true }
+strum = "0.28.0"
