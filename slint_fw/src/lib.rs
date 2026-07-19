@@ -11,6 +11,12 @@ pub mod re_exports {
 mod worker;
 pub use worker::WorkerThread;
 
+/// Extension method on `XxxAdopter`.
+pub trait GlobalExt<VM> {
+    /// Registers viewmodel at `XxxAdopter` i.e. set `XxxViewModelTrait`'s method as the callback handler.
+    fn register_viewmodel(&self, vm: std::rc::Rc<core::cell::RefCell<VM>>);
+}
+
 /// A handle to slint's property.
 ///
 /// [`PropertyHandle`] does NOT implement [`Clone`] because a property SHOULD NOT be mutated from

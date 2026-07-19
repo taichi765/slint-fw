@@ -36,9 +36,8 @@ pub fn route(
         let typs = item.variants.iter().map(|v| {
             let vm_trait_name = viewmodel_trait_ident(&v.ident);
             let states_struct_name = state_struct_ident(&v.ident);
-            let public_global_ext_trait_name = public_global_ext_trait_ident(&v.ident);
             quote! {
-                #vm_trait_name, #states_struct_name, #public_global_ext_trait_name,
+                #vm_trait_name, #states_struct_name,
             }
         });
         quote! {
@@ -117,21 +116,6 @@ pub fn adopter(
 fn adopter_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream {
     let viewmodel_trait_name = viewmodel_trait_ident(&item.name);
 
-    /*let set_callback_handlers = item.callbacks.into_iter().map(|f| {
-        let callback_field_name = f.ident;
-        let vm_callback_name = format_ident!("on_{}", &callback_field_name);
-
-        quote! {
-            let _self = self.0.as_ref();
-            #[allow(unused)]
-            { *&#inner_adopter_name::FIELD_OFFSETS.#callback_field_name() }
-                .apply_pin(_self)
-                .set_handler(move |args| #vm_callback_name());
-            { *&InnerConnectionFailedAdopter::FIELD_OFFSETS.callback_tracker_retry_connection() }
-                .apply_pin(_self)
-                .mark_dirty();
-        }
-    });*/
     let state_struct = generate_state_struct(&item.name, &item.properties);
     let viewmodel_trait = {
         let callbacks = item.callbacks.iter().map(|f| {
@@ -156,7 +140,6 @@ fn adopter_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream 
     };
     let regiter_impl = {
         let public_global_name = public_global_ident(&item.name);
-        let global_ext_trait_name = public_global_ext_trait_ident(&item.name);
 
         let registerations = item.callbacks.iter().map(|cb| {
             let method_name = format_ident!("on_{}", cb.ident);
@@ -180,14 +163,9 @@ fn adopter_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream 
         });
 
         quote! {
-            pub trait #global_ext_trait_name {
-                fn register_viewmodel<VM>(&self, vm: std::rc::Rc<core::cell::RefCell<VM>>)
-                    where VM: #viewmodel_trait_name + 'static;
-            }
-
-            impl #global_ext_trait_name for #public_global_name<'_> {
-                fn register_viewmodel<VM>(&self, vm: std::rc::Rc<core::cell::RefCell<VM>>)
-                    where VM: #viewmodel_trait_name + 'static {
+            impl<VMImpl> slint_fw::GlobalExt<VMImpl> for #public_global_name<'_>
+                where VMImpl: #viewmodel_trait_name + 'static {
+                fn register_viewmodel(&self, vm: std::rc::Rc<core::cell::RefCell<VMImpl>>){
                     #(#registerations)*
                 }
             }
@@ -275,8 +253,4 @@ fn viewmodel_trait_ident(base: impl IdentFragment) -> Ident {
 
 fn public_global_ident(base: impl IdentFragment) -> Ident {
     format_ident!("{}Adopter", &base)
-}
-
-fn public_global_ext_trait_ident(base: impl IdentFragment) -> Ident {
-    format_ident!("{}AdopterExt", base)
 }
