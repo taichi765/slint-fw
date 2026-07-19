@@ -131,20 +131,7 @@ fn adopter_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream 
                 .mark_dirty();
         }
     });*/
-    let state_struct = {
-        let fields = item.properties.into_iter().map(|f| {
-            let field_name = f.ident;
-            let field_ty = f.ty;
-            quote! {
-                #field_name: slint_fw::PropertyHandle<#field_ty>,
-            }
-        });
-        quote! {
-            pub struct #state_struct_name {
-                #(#fields)*
-            }
-        }
-    };
+    let state_struct = generate_state_struct(&item.name, &item.properties);
     let viewmodel_trait = {
         let callbacks = item.callbacks.into_iter().map(|f| {
             let fn_name = format_ident!("on_{}", &f.ident);
@@ -184,5 +171,83 @@ fn adopter_inner(_attr: TokenStream, item: InnerGlobalComponent) -> TokenStream 
         #state_struct
 
         #viewmodel_trait
+
+        #regiter_impl
     }
+}
+
+fn generate_state_struct(base: &str, properties: &Vec<PropertyField>) -> TokenStream {
+    let state_struct_name = state_struct_ident(base);
+    let public_global_name = public_global_ident(base);
+    let state_struct_def = {
+        let fields = properties.iter().map(|f| {
+            let field_name = &f.ident;
+            let field_ty = &f.ty;
+            quote! {
+                pub #field_name: slint_fw::PropertyHandle<#field_ty>,
+            }
+        });
+
+        quote! {
+            #[derive(Debug)]
+            pub struct #state_struct_name {
+                #(#fields)*
+            }
+        }
+    };
+    let state_struct_impl = {
+        let field_impls = properties.iter().map(|f| {
+            let field_name = &f.ident;
+            let get_method_name = format_ident!("get_{}", &f.ident);
+            let set_method_name = format_ident!("set_{}", &f.ident);
+            quote! {
+                #field_name: slint_fw::PropertyHandle::new(
+                    {
+                        let adopter_weak = adopter_weak.clone();
+                        move || {
+                            let adopter_strong = adopter_weak.unwrap();
+                            adopter_strong.#get_method_name()
+                        }
+                    },
+                    {
+                        let adopter_weak = adopter_weak.clone();
+                        move |val| {
+                            let adopter_strong = adopter_weak.unwrap();
+                            adopter_strong.#set_method_name(val)
+                        }
+                    },
+                ),
+            }
+        });
+        quote! {
+            impl #state_struct_name {
+                pub fn new(adopter_weak: slint::Weak<#public_global_name<'static>>) -> Self {
+                    Self {
+                        #(#field_impls)*
+                    }
+                }
+            }
+        }
+    };
+    quote! {
+        #state_struct_def
+
+        #state_struct_impl
+    }
+}
+
+fn state_struct_ident(base: impl IdentFragment) -> Ident {
+    format_ident!("{}States", base)
+}
+
+fn viewmodel_trait_ident(base: impl IdentFragment) -> Ident {
+    format_ident!("{}ViewModelTrait", &base)
+}
+
+fn public_global_ident(base: impl IdentFragment) -> Ident {
+    format_ident!("{}Adopter", &base)
+}
+
+fn public_global_ext_trait_ident(base: impl IdentFragment) -> Ident {
+    format_ident!("{}AdopterExt", base)
 }
