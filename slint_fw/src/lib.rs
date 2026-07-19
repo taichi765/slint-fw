@@ -15,12 +15,29 @@ pub use worker::WorkerThread;
 ///
 /// [`PropertyHandle`] does NOT implement [`Clone`] because a property SHOULD NOT be mutated from
 /// multiple places (you CAN but SHOULDN'T).
+///
+/// # Reference Cycle
+/// [`PropertyHandle`] is usually owned by `XxxStates`, and `XxxStates` is owned by `XXxViewModelTrait`'s implementor,
+/// and `XxxViewModelTrait`'s implementor is passed to `InnerXxxAdopter` via `XxxAdopter::on_click()`.
+///
+/// Finally `InnerXxxAdopter` has strong reference to [`PropertyHandle`], but [`PropertyHandle`] also references `InnerXxxAdopter` in order
+/// to access internal `slint::private_unstable_api::Property`.
+/// If [`PropertyHandle`] have strong reference to `InnerXxxAdopter`, it causes reference cycle.
+///
+/// Therefore, closures given to [`PropertyHandle`] must have weak reference to `InnerXxxAdopter` (or `XxxAdopter`) and must not have strong reference.
 pub struct PropertyHandle<T> {
     getter: Box<dyn Fn() -> T>,
     setter: Box<dyn Fn(T)>,
 }
 
 impl<T> PropertyHandle<T> {
+    pub fn new(getter: impl Fn() -> T + 'static, setter: impl Fn(T) + 'static) -> Self {
+        Self {
+            getter: Box::new(getter),
+            setter: Box::new(setter),
+        }
+    }
+
     pub fn get(&self) -> T {
         (self.getter)()
     }
