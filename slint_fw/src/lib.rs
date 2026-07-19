@@ -3,7 +3,10 @@ use std::fmt::Debug;
 use thiserror::Error;
 
 pub mod nav;
-pub use slint_fw_macros::slint_fw;
+pub use slint_fw_macros::{adopter, route};
+pub mod re_exports {
+    pub use strum::{EnumDiscriminants, EnumIter, IntoEnumIterator};
+}
 
 /// A handle to slint's property.
 ///

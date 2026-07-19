@@ -1,6 +1,31 @@
+use quote::format_ident;
 use syn::{
-    Field, Fields, GenericArgument, Ident, ItemStruct, PathArguments, Type, TypeTuple, parse::Parse,
+    Field, Fields, GenericArgument, Ident, ItemStruct, MetaNameValue, PathArguments, Token, Type,
+    TypeTuple, parse::Parse, parse_quote,
 };
+
+pub struct RouteMacroAttr {
+    pub slint_type_name: Ident,
+}
+
+impl Parse for RouteMacroAttr {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let list = input.parse_terminated(MetaNameValue::parse, Token![,])?;
+        let mut slint_type = None;
+        for meta in list {
+            match meta.path {
+                p if p.is_ident("slint_type") => {
+                    let typ_name: Ident = parse_quote!(meta.value);
+                    slint_type = Some(typ_name);
+                }
+                _ => return Err(syn::Error::new_spanned(meta, "unknown option")),
+            }
+        }
+        Ok(Self {
+            slint_type_name: slint_type.unwrap_or(format_ident!("UiNavRoute")),
+        })
+    }
+}
 
 pub struct InnerGlobalComponent {
     pub original_ident: Ident,

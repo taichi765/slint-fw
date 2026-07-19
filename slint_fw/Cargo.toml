@@ -12,4 +12,4 @@ slint-fw-macros = { path = "../slint_fw_macros" }
 thiserror = { workspace = true }
 futures-util = { workspace = true }
 tracing = { workspace = true }
-strum = "0.28.0"
+strum = { version = "0.28.0", features = ["derive"] }
