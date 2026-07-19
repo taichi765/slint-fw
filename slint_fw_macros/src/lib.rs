@@ -76,12 +76,22 @@ pub fn route(
             }
         }
     };
+    let route_enum_impl = {
+        quote! {
+            impl slint_fw::nav::RouteEnum for #item_name {
+                type Kind = #kind_enum_name;
+                type SlintKind = #slint_typ_name;
+            }
+        }
+    };
     quote! {
         #item_with_attr
 
         #into_impl
 
         #kind_impl
+
+        #route_enum_impl
 
         #re_exports
     }
