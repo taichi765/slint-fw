@@ -1,3 +1,10 @@
+//! Heavily Inspired by Jetpack Navigation 3 (see https://developer.android.com/guide/navigation).
+//!
+//! Key types of this module are:
+//! - [`NavHost`]
+//! - [`NavController`]
+//! - [`NavDestination`]
+
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},

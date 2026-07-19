@@ -13,3 +13,4 @@ thiserror = { workspace = true }
 futures-util = { workspace = true }
 tracing = { workspace = true }
 strum = { version = "0.28.0", features = ["derive"] }
+tokio = { version = "1.52.3", features = ["sync", "rt-multi-thread", "macros"] }

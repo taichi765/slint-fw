@@ -4,9 +4,12 @@ use thiserror::Error;
 
 pub mod nav;
 pub use slint_fw_macros::{adopter, route};
+/// Re-exports external crates' types.
 pub mod re_exports {
     pub use strum::{EnumDiscriminants, EnumIter, IntoEnumIterator};
 }
+mod worker;
+pub use worker::WorkerThread;
 
 /// A handle to slint's property.
 ///
