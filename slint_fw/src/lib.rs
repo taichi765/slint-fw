@@ -1,5 +1,5 @@
 use futures_util::{StreamExt as _, stream::FusedStream};
-use std::fmt::Debug;
+use std::{fmt::Debug, rc::Rc};
 use thiserror::Error;
 
 pub mod nav;
@@ -19,9 +19,6 @@ pub trait GlobalExt<VM> {
 
 /// A handle to slint's property.
 ///
-/// [`PropertyHandle`] does NOT implement [`Clone`] because a property SHOULD NOT be mutated from
-/// multiple places (you CAN but SHOULDN'T).
-///
 /// # Reference Cycle
 /// [`PropertyHandle`] is usually owned by `XxxStates`, and `XxxStates` is owned by `XXxViewModelTrait`'s implementor,
 /// and `XxxViewModelTrait`'s implementor is passed to `InnerXxxAdopter` via `XxxAdopter::on_click()`.
@@ -31,16 +28,17 @@ pub trait GlobalExt<VM> {
 /// If [`PropertyHandle`] have strong reference to `InnerXxxAdopter`, it causes reference cycle.
 ///
 /// Therefore, closures given to [`PropertyHandle`] must have weak reference to `InnerXxxAdopter` (or `XxxAdopter`) and must not have strong reference.
+#[derive(Clone)]
 pub struct PropertyHandle<T> {
-    getter: Box<dyn Fn() -> T>,
-    setter: Box<dyn Fn(T)>,
+    getter: Rc<dyn Fn() -> T>,
+    setter: Rc<dyn Fn(T)>,
 }
 
 impl<T> PropertyHandle<T> {
     pub fn new(getter: impl Fn() -> T + 'static, setter: impl Fn(T) + 'static) -> Self {
         Self {
-            getter: Box::new(getter),
-            setter: Box::new(setter),
+            getter: Rc::new(getter),
+            setter: Rc::new(setter),
         }
     }
 
@@ -98,8 +96,8 @@ mod tests {
     fn property_handle_bind_returns_err_when_stream_ends() {
         let val = Cell::new(0);
         let prop = PropertyHandle {
-            getter: Box::new(|| val.get()),
-            setter: Box::new(|v| {
+            getter: Rc::new(|| val.get()),
+            setter: Rc::new(|v| {
                 val.set(v);
             }),
         };
