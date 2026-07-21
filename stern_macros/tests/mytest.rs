@@ -1,8 +1,8 @@
 use std::cell::Cell;
 
 use slint::private_unstable_api::re_exports as sp;
-use slint_fw as fw;
-use slint_fw_macros::adopter;
+use stern as fw;
+use stern_macros::adopter;
 
 #[adopter]
 struct InnerTestAdopter {

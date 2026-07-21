@@ -1,13 +1,13 @@
 [package]
-name = "slint-fw"
-# When including taichi765/slint-fw repository as git submodule, version is inherited from
+name = "stern"
+# When including taichi765/stern repository as git submodule, version is inherited from
 # user's workspace, not this repository's workspace.
-# Due to that, we need to sync versions between slint-fw and slint-fw-macros manually.
+# Due to that, we need to sync versions between stern and stern-macros manually.
 version = "0.1.0"
 edition.workspace = true
 
 [dependencies]
-slint-fw-macros = { path = "../slint_fw_macros" }
+stern-macros = { path = "../stern_macros" }
 
 thiserror = { workspace = true }
 futures-util = { workspace = true }

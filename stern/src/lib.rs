@@ -3,7 +3,7 @@ use std::{fmt::Debug, rc::Rc};
 use thiserror::Error;
 
 pub mod nav;
-pub use slint_fw_macros::{adopter, route};
+pub use stern_macros::{adopter, route};
 /// Re-exports external crates' types.
 pub mod re_exports {
     pub use strum::{EnumDiscriminants, EnumIter, IntoEnumIterator};

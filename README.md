@@ -1,4 +1,4 @@
-# slint-fw
+# stern
 Framework for [Slint](https://slint.dev), inspired by [Jetpack Compose](https://developer.android.com/compose).
 
 Slint is an open-source declarative GUI toolkit to build native user interfaces for Rust, C++, JavaScript, or Python apps.

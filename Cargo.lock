@@ -3825,30 +3825,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "slint-fw"
-version = "0.1.0"
-dependencies = [
- "futures-util",
- "slint-fw-macros",
- "strum",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "slint-fw-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "slint",
- "slint-fw",
- "syn",
- "trybuild",
-]
-
-[[package]]
 name = "slint-macros"
 version = "1.18.0"
 source = "git+https://github.com/taichi765/slint#94641de33bbd9de74b446b1fa7fb3bba2d98434d"
@@ -3969,6 +3945,30 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "stern"
+version = "0.1.0"
+dependencies = [
+ "futures-util",
+ "stern-macros",
+ "strum",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "stern-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "slint",
+ "stern",
+ "syn",
+ "trybuild",
+]
 
 [[package]]
 name = "strict-num"
